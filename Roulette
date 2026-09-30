@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Community - Flight Roulette</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-color: #f8fafc;
+            --subtext-color: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        h1 { margin-top: 0; color: #fff; font-size: 1.8rem; }
+        p { color: var(--subtext-color); font-size: 0.95rem; }
+
+        .route-card {
+            background-color: #0f172a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .route-field {
+            margin-bottom: 12px;
+        }
+
+        .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--subtext-color);
+            letter-spacing: 1px;
+            display: block;
+        }
+
+        .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            width: 100%;
+        }
+
+        button:hover { background-color: var(--accent-hover); color: #fff; }
+
+        .submission-info {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #334155;
+            font-size: 0.85rem;
+            color: var(--subtext-color);
+        }
+
+        .flight-id {
+            background: #334155;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-color);
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Flight Roulette</h1>
+    <p>Generate a random assignment, complete the flight, and post your screenshot in Discord to claim your badge.</p>
+
+    <button onclick="generateFlight()">Spin the Wheel</button>
+
+    <div class="route-card" id="routeCard" style="display: none;">
+        <div class="route-field">
+            <span class="label">Aircraft</span>
+            <span class="value" id="aircraft">-</span>
+        </div>
+        <div class="route-field">
+            <span class="label">Route</span>
+            <span class="value" id="route">-</span>
+        </div>
+        <div class="route-field">
+            <span class="label">Weather & Time</span>
+            <span class="value" id="conditions">-</span>
+        </div>
+        <div class="route-field">
+            <span class="label">Special Challenge</span>
+            <span class="value" id="challenge">-</span>
+        </div>
+        <div class="route-field">
+            <span class="label">Verification ID</span>
+            <span class="value flight-id" id="flightId">#-</span>
+        </div>
+    </div>
+
+    <div class="submission-info" id="submissionInfo" style="display: none;">
+        Copy your <b>Verification ID</b> and include it in your Discord screenshot upload to claim the <b id="badgeName">Pilot Badge</b>!
+    </div>
+</div>
+
+<script>
+    // Customize these arrays to match your specific flight simulator/community setup
+    const aircraftList = ["Dash 8 Q400", "Boeing 737-800", "Airbus A320neo", "Cessna 172 Skyhawk", "CRJ-900", "Boeing 777-300ER"];
+    
+    const airports = [
+        { code: "EGKK", name: "London Gatwick" },
+        { code: "GCLP", name: "Gran Canaria" },
+        { code: "LOWI", name: "Innsbruck" },
+        { code: "KLAX", name: "Los Angeles" },
+        { code: "TNCM", name: "Princess Juliana" },
+        { code: "EHAM", name: "Amsterdam Schiphol" }
+    ];
+
+    const conditions = ["Heavy Turbulence & Rain", "Night Flight (Clear Skies)", "Dense Fog (Low Visibility)", "Strong Crosswinds", "Sunset Departure"];
+    const challenges = ["No Autopilot (Manual Flight Only)", "Perform a Butter Landing (<100 fpm)", "First-Person Cockpit View Only", "Strict Fuel Management", "Standard Flight"];
+
+    function getRandomItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateFlight() {
+        const aircraft = getRandomItem(aircraftList);
+        
+        // Ensure origin and destination aren't identical
+        let origin = getRandomItem(airports);
+        let destination = getRandomItem(airports);
+        while (origin.code === destination.code) {
+            destination = getRandomItem(airports);
+        }
+
+        const weather = getRandomItem(conditions);
+        const challenge = getRandomItem(challenges);
+        const flightId = "FL-" + Math.floor(1000 + Math.random() * 9000);
+
+        // Update DOM
+        document.getElementById("aircraft").innerText = aircraft;
+        document.getElementById("route").innerText = `${origin.name} (${origin.code}) → ${destination.name} (${destination.code})`;
+        document.getElementById("conditions").innerText = weather;
+        document.getElementById("challenge").innerText = challenge;
+        document.getElementById("flightId").innerText = flightId;
+
+        // Show result card
+        document.getElementById("routeCard").style.display = "block";
+        document.getElementById("submissionInfo").style.display = "block";
+    }
+</script>
+
+</body>
+</html>
